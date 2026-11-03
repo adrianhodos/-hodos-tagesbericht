@@ -36,8 +36,90 @@ $('loginForm').addEventListener('submit',async e=>{e.preventDefault();if(!db)ret
 $('logoutBtn').addEventListener('click',async()=>{const {error}=await db.auth.signOut();if(error)status(error.message,'error');else{sessionUser=null;profile=null;showApp(false);status(t('Deconectat.','Abgemeldet.'));}});
 $('reportForm').addEventListener('submit',async e=>{e.preventDefault();if(!sessionUser)return;const kmStart=Number($('km_start').value),kmEnd=Number($('km_end').value),breakMinutes=Number($('break_minutes').value);if(!Number.isSafeInteger(kmStart)||!Number.isSafeInteger(kmEnd)||kmEnd<kmStart){status(t('Km sosire trebuie să fie cel puțin egal cu km plecare.','KM Ende muss mindestens KM Start entsprechen.'),'error');return;}if(!Number.isSafeInteger(breakMinutes)||breakMinutes<0){status(t('Verifică durata pauzei.','Pausendauer prüfen.'),'error');return;}const record={driver_id:sessionUser.id,report_date:$('report_date').value,truck_plate:$('truck_plate').value.trim(),route_name:$('route_name').value.trim(),km_start:kmStart,km_end:kmEnd,break_minutes:breakMinutes,oil_checked:$('oil_checked').checked,tires_checked:$('tires_checked').checked,lights_checked:$('lights_checked').checked,notes:$('notes').value.trim()};if(!record.truck_plate||!record.route_name){status(t('Completează camionul și ruta.','Kennzeichen und Tour eingeben.'),'error');return;}const btn=$('saveBtn');btn.disabled=true;status(t('Se salvează…','Wird gespeichert…'));try{const {error}=await db.from('daily_reports').insert(record);if(error)throw error;status(t('Raport salvat cu succes!','Bericht erfolgreich gespeichert!'),'success');$('reportForm').reset();$('report_date').value=todayLocal();$('break_minutes').value='0';await loadReports();}catch(err){status(t('Nu s-a salvat: ','Nicht gespeichert: ')+err.message,'error');}finally{btn.disabled=false;}});
 $('refreshBtn').addEventListener('click',loadReports);
-async function loadReports(){if(!sessionUser)return;const area=$('reports');area.textContent=t('Se încarcă…','Lädt…');let query=db.from('daily_reports').select('report_date,truck_plate,route_name,km_start,km_end,break_minutes,notes,created_at,driver_id').order('created_at',{ascending:false}).limit(30);if(profile?.role!=='admin')query=query.eq('driver_id',sessionUser.id);const {data,error}=await query;if(error){area.textContent=t('Eroare: ','Fehler: ')+error.message;return;}area.replaceChildren();if(!data?.length){area.textContent=t('Nu există rapoarte încă.','Noch keine Berichte.');return;}for(const r of data){const el=document.createElement('div');el.className='record';const strong=document.createElement('strong');strong.textContent=`${r.report_date} · ${r.truck_plate}`;const line=document.createElement('div');line.textContent=`${r.route_name} · ${r.km_start}–${r.km_end} km (${r.km_end-r.km_start} km) · ${r.break_minutes} min`;const note=document.createElement('div');note.className='muted';note.textContent=r.notes||'';el.append(strong,line,note);area.append(el);}}
-(async()=>{translate();if(!window.supabase?.createClient){status(t('Biblioteca Supabase nu s-a încărcat. Verifică internetul.','Supabase-Bibliothek nicht geladen. Internet prüfen.'),'error');return;}db=window.supabase.createClient(URL_SUPABASE,PUBLISHABLE_KEY);await refreshSession();db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){sessionUser=null;profile=null;showApp(false);}});})().catch(e=>status(e.message,'error'));
+async function loadReports() {
+  if (!sessionUser) return;
+  const area = $('reports');
+  area.textContent = t('Se încarcă…', 'Lädt…');
+
+  let query = db.from('daily_reports')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(30);
+
+  if (profile?.role !== 'admin') {
+    query = query.eq('driver_id', sessionUser.id);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    area.textContent = 'Eroare: ' + error.message;
+    return;
+  }
+
+  area.replaceChildren();
+
+  if (!data?.length) {
+    area.textContent = t('Nu există rapoarte.', 'Keine Berichte.');
+    return;
+  }
+
+  let names = {};
+  if (profile?.role === 'admin') {
+    const ids = [...new Set(data.map(r => r.driver_id))];
+    const result = await db.from('profiles')
+      .select('id,full_name')
+      .in('id', ids);
+
+    if (!result.error) {
+      for (const p of result.data || []) {
+        names[p.id] = p.full_name;
+      }
+    }
+  }
+
+  for (const r of data) {
+    const details = document.createElement('details');
+    details.className = 'record';
+
+    const summary = document.createElement('summary');
+    summary.textContent =
+      `${r.report_date} · ${r.truck_plate} · ` +
+      (names[r.driver_id] || (r.driver_id === sessionUser.id
+        ? profile?.full_name || ''
+        : t('Șofer necunoscut', 'Fahrer unbekannt')));
+
+    details.append(summary);
+
+    const fields = [
+      [t('Șofer', 'Fahrer'), names[r.driver_id] || (r.driver_id === sessionUser.id ? profile?.full_name : '') || r.driver_id],
+      [t('Rută', 'Tour'), r.route_name],
+      [t('Km plecare', 'Km Start'), r.km_start],
+      [t('Km sosire', 'Km Ende'), r.km_end],
+      [t('Km parcurși', 'Gefahrene km'), r.km_end - r.km_start],
+      [t('Pauză', 'Pause'), `${r.break_minutes} min`],
+      [t('Ulei verificat', 'Öl geprüft'), r.oil_checked],
+      [t('Anvelope verificate', 'Reifen geprüft'), r.tires_checked],
+      [t('Lumini verificate', 'Licht geprüft'), r.lights_checked],
+      [t('Observații / defecte', 'Bemerkungen / Mängel'), r.notes || '—']
+    ];
+
+    for (const [label, value] of fields) {
+      const line = document.createElement('div');
+      const shown = typeof value === 'boolean'
+        ? (value ? '✓ Da / Ja' : '✗ Nu / Nein')
+        : String(value ?? '—');
+
+      line.textContent = `${label}: ${shown}`;
+      line.style.padding = '7px 0';
+      details.append(line);
+    }
+
+    area.append(details);
+  }
+}
+
+  (async()=>{translate();if(!window.supabase?.createClient){status(t('Biblioteca Supabase nu s-a încărcat. Verifică internetul.','Supabase-Bibliothek nicht geladen. Internet prüfen.'),'error');return;}db=window.supabase.createClient(URL_SUPABASE,PUBLISHABLE_KEY);await refreshSession();db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){sessionUser=null;profile=null;showApp(false);}});})().catch(e=>status(e.message,'error'));
 db?.auth.onAuthStateChange(async (event, session) => {
   if (event !== 'PASSWORD_RECOVERY') return;
 
