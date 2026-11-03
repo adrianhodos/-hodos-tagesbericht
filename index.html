@@ -38,5 +38,20 @@ $('reportForm').addEventListener('submit',async e=>{e.preventDefault();if(!sessi
 $('refreshBtn').addEventListener('click',loadReports);
 async function loadReports(){if(!sessionUser)return;const area=$('reports');area.textContent=t('Se încarcă…','Lädt…');let query=db.from('daily_reports').select('report_date,truck_plate,route_name,km_start,km_end,break_minutes,notes,created_at,driver_id').order('created_at',{ascending:false}).limit(30);if(profile?.role!=='admin')query=query.eq('driver_id',sessionUser.id);const {data,error}=await query;if(error){area.textContent=t('Eroare: ','Fehler: ')+error.message;return;}area.replaceChildren();if(!data?.length){area.textContent=t('Nu există rapoarte încă.','Noch keine Berichte.');return;}for(const r of data){const el=document.createElement('div');el.className='record';const strong=document.createElement('strong');strong.textContent=`${r.report_date} · ${r.truck_plate}`;const line=document.createElement('div');line.textContent=`${r.route_name} · ${r.km_start}–${r.km_end} km (${r.km_end-r.km_start} km) · ${r.break_minutes} min`;const note=document.createElement('div');note.className='muted';note.textContent=r.notes||'';el.append(strong,line,note);area.append(el);}}
 (async()=>{translate();if(!window.supabase?.createClient){status(t('Biblioteca Supabase nu s-a încărcat. Verifică internetul.','Supabase-Bibliothek nicht geladen. Internet prüfen.'),'error');return;}db=window.supabase.createClient(URL_SUPABASE,PUBLISHABLE_KEY);await refreshSession();db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){sessionUser=null;profile=null;showApp(false);}});})().catch(e=>status(e.message,'error'));
+db?.auth.onAuthStateChange(async (event, session) => {
+  if (event !== 'PASSWORD_RECOVERY') return;
+
+  setTimeout(async () => {
+    const parola = prompt('Introdu parola nouă (minimum 8 caractere):');
+    if (!parola) return;
+    if (parola.length < 8) {
+      alert('Parola trebuie să aibă minimum 8 caractere.');
+      return;
+    }
+
+    const { error } = await db.auth.updateUser({ password: parola });
+    alert(error ? 'Eroare: ' + error.message : 'Parola a fost schimbată cu succes!');
+  }, 0);
+});
 </script>
 </body></html>
