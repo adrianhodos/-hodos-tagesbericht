@@ -1,141 +1,44 @@
 <!doctype html>
-<html lang="de">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#17365d"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Hodos Bericht">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>Hodos Tagesbericht</title>
-<style>
-:root{font-family:system-ui,-apple-system,Arial,sans-serif;color:#16283e;background:#edf2f7}*{box-sizing:border-box}body{margin:0;padding:16px}main{max-width:650px;margin:auto}.panel{background:#fff;padding:20px;border-radius:16px;box-shadow:0 5px 24px #17365d12;margin:14px 0}h1{font-size:1.6rem;color:#17365d;margin:0 0 8px}h2{font-size:1.12rem;color:#17365d}label{display:block;font-weight:600;margin:13px 0 5px}input,select,textarea,button{font:inherit}input:not([type=checkbox]),select,textarea{width:100%;padding:12px;border:1px solid #b6c5d4;border-radius:9px;background:white}textarea{min-height:90px}button{border:0;background:#17365d;color:#fff;padding:13px 16px;border-radius:9px;font-weight:700;cursor:pointer}button.secondary{background:#e5edf6;color:#17365d}button:disabled{opacity:.6}.row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}.checks label{display:flex;gap:10px;align-items:center;padding:10px;background:#f2f6fa;border-radius:9px;font-weight:500}.checks input{width:21px;height:21px}.muted{color:#62758a;font-size:.9rem}.error{color:#a61d24}.success{color:#136d42}.hidden{display:none!important}.record{padding:12px;border-bottom:1px solid #e0e7ee;overflow-wrap:anywhere}.record:last-child{border:0}#status{min-height:24px;white-space:pre-wrap}header{margin-bottom:12px}
-</style>
-</head>
-<body><main>
-<header class="row"><div><h1>🚚 Hodos Tagesbericht</h1><div class="muted">Raport zilnic / Täglicher Fahrerbericht</div></div><button id="lang" class="secondary" type="button">RO / DE</button></header>
-<section id="loginBox" class="panel"><h2 data-ro="Autentificare șofer" data-de="Fahrer-Anmeldung">Autentificare șofer</h2><form id="loginForm"><label data-ro="E-mail" data-de="E-Mail">E-mail</label><input id="email" type="email" autocomplete="username" required><label data-ro="Parolă" data-de="Passwort">Parolă</label><input id="password" type="password" autocomplete="current-password" required><p><button type="submit" id="loginBtn" data-ro="Conectare" data-de="Anmelden">Conectare</button></p></form><p class="muted" data-ro="Folosește e-mailul și parola create în Supabase Auth." data-de="E-Mail und Passwort aus Supabase Auth verwenden.">Folosește e-mailul și parola create în Supabase Auth.</p></section>
+<html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#17365d"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><title>Hodos Tagesbericht</title>
+<style>:root{font-family:system-ui,-apple-system,Arial,sans-serif;color:#16283e;background:#edf2f7}*{box-sizing:border-box}body{margin:0;padding:16px}main{max-width:650px;margin:auto}.panel{background:#fff;padding:20px;border-radius:16px;box-shadow:0 5px 24px #17365d12;margin:14px 0}h1{font-size:1.6rem;color:#17365d;margin:0 0 8px}h2{font-size:1.12rem;color:#17365d}label{display:block;font-weight:600;margin:13px 0 5px}input,textarea,button{font:inherit}input:not([type=checkbox]),textarea{width:100%;padding:12px;border:1px solid #b6c5d4;border-radius:9px;background:#fff}textarea{min-height:90px}button{border:0;background:#17365d;color:white;padding:13px 16px;border-radius:9px;font-weight:700;cursor:pointer}button.secondary{background:#e5edf6;color:#17365d}button.danger{background:#136d42}button:disabled{opacity:.55}.row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}.checks label{display:flex;gap:10px;align-items:center;padding:10px;background:#f2f6fa;border-radius:9px;font-weight:500}.checks input{width:21px;height:21px}.muted{color:#62758a;font-size:.9rem}.error{color:#a61d24}.success{color:#136d42}.hidden{display:none!important}.record{padding:12px;border-bottom:1px solid #e0e7ee;overflow-wrap:anywhere}.record:last-child{border:0}#status{min-height:24px;white-space:pre-wrap}header{margin-bottom:12px}</style></head>
+<body><main><header class="row"><div><h1>🚚 Hodos Tagesbericht</h1><div class="muted">Raport zilnic / Täglicher Fahrerbericht</div></div><button id="lang" class="secondary" type="button">RO / DE</button></header>
+<section id="loginBox" class="panel"><h2 data-ro="Autentificare șofer" data-de="Fahrer-Anmeldung">Autentificare șofer</h2><form id="loginForm"><label>E-mail</label><input id="email" type="email" autocomplete="username" required><label data-ro="Parolă" data-de="Passwort">Parolă</label><input id="password" type="password" autocomplete="current-password" required><p><button type="submit" id="loginBtn" data-ro="Conectare" data-de="Anmelden">Conectare</button></p></form></section>
 <section id="appBox" class="hidden"><div class="panel row"><div><strong id="userName"></strong><div class="muted" id="userRole"></div></div><button class="secondary" id="logoutBtn" type="button" data-ro="Ieșire" data-de="Abmelden">Ieșire</button></div>
-<section class="panel"><h2 data-ro="Raport nou" data-de="Neuer Tagesbericht">Raport nou</h2><form id="reportForm"><label data-ro="Data" data-de="Datum">Data</label><input id="report_date" type="date" required><label data-ro="Număr camion" data-de="LKW-Kennzeichen">Număr camion</label><input id="truck_plate" maxlength="30" placeholder="SEF-HA 23" required><label data-ro="Tură / rută" data-de="Tour / Route">Tură / rută</label><input id="route_name" maxlength="150" required><div class="grid"><div><label data-ro="Km plecare" data-de="KM Start">Km plecare</label><input id="km_start" type="number" min="0" step="1" required></div><div><label data-ro="Km sosire" data-de="KM Ende">Km sosire</label><input id="km_end" type="number" min="0" step="1" required></div></div><label data-ro="Pauză (minute)" data-de="Pause (Minuten)">Pauză (minute)</label><input id="break_minutes" type="number" min="0" max="1440" step="1" value="0" required>
-<label data-ro="Motorină alimentată (litri)" data-de="Getankt (Liter)">Motorină alimentată (litri)</label><input id="fuel_liters" type="number" min="0" step="0.01" placeholder="0">
-<div class="checks"><label><input type="checkbox" id="oil_checked"><span data-ro="Ulei verificat" data-de="Öl kontrolliert">Ulei verificat</span></label><label><input type="checkbox" id="tires_checked"><span data-ro="Anvelope verificate" data-de="Reifen kontrolliert">Anvelope verificate</span></label><label><input type="checkbox" id="lights_checked"><span data-ro="Lumini verificate" data-de="Beleuchtung kontrolliert">Lumini verificate</span></label></div><label data-ro="Observații / defecte" data-de="Bemerkungen / Mängel">Observații / defecte</label><textarea id="notes" maxlength="2000"></textarea><p><button id="saveBtn" type="submit" data-ro="Salvează raportul" data-de="Bericht speichern">Salvează raportul</button></p></form></section>
-<section class="panel"><div class="row"><h2 data-ro="Rapoarte recente" data-de="Letzte Berichte">Rapoarte recente</h2><button type="button" class="secondary" id="refreshBtn" data-ro="Actualizează" data-de="Aktualisieren">Actualizează</button></div><div id="reports"></div></section></section>
-<section class="panel"><div id="status" role="status" aria-live="polite"></div></section>
-</main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script>
+<section class="panel"><h2 data-ro="Tura în curs" data-de="Laufende Tour">Tura în curs</h2><div class="muted" id="draftState"></div><form id="reportForm"><label data-ro="Data" data-de="Datum">Data</label><input id="report_date" type="date" required><label data-ro="Număr camion" data-de="LKW-Kennzeichen">Număr camion</label><input id="truck_plate" maxlength="30" placeholder="SEF-HA 23" required><label data-ro="Tură / rută" data-de="Tour / Route">Tură / rută</label><input id="route_name" maxlength="150" required><div class="grid"><div><label data-ro="Km plecare" data-de="KM Start">Km plecare</label><input id="km_start" type="number" min="0" step="1" required></div><div><label data-ro="Km sosire" data-de="KM Ende">Km sosire</label><input id="km_end" type="number" min="0" step="1"></div></div><label data-ro="Pauză (minute)" data-de="Pause (Minuten)">Pauză (minute)</label><input id="break_minutes" type="number" min="0" max="1440" step="1" value="0" required><label data-ro="Motorină alimentată (litri)" data-de="Getankt (Liter)">Motorină alimentată (litri)</label><input id="fuel_liters" type="number" min="0" step="0.01" placeholder="0"><div class="checks"><label><input type="checkbox" id="oil_checked"><span data-ro="Ulei verificat" data-de="Öl kontrolliert">Ulei verificat</span></label><label><input type="checkbox" id="tires_checked"><span data-ro="Anvelope verificate" data-de="Reifen kontrolliert">Anvelope verificate</span></label><label><input type="checkbox" id="lights_checked"><span data-ro="Lumini verificate" data-de="Beleuchtung kontrolliert">Lumini verificate</span></label></div><label data-ro="Observații / defecte" data-de="Bemerkungen / Mängel">Observații / defecte</label><textarea id="notes" maxlength="2000"></textarea><p class="row"><button id="saveBtn" type="submit" data-ro="Salvează progresul" data-de="Zwischenstand speichern">Salvează progresul</button><button id="finishBtn" class="danger" type="button" data-ro="Finalizează tura" data-de="Tour abschließen">Finalizează tura</button></p></form></section>
+<section class="panel"><div class="row"><h2 data-ro="Rapoarte recente" data-de="Letzte Berichte">Rapoarte recente</h2><button type="button" class="secondary" id="refreshBtn" data-ro="Actualizează" data-de="Aktualisieren">Actualizează</button></div><div id="reports"></div></section></section><section class="panel"><div id="status" role="status" aria-live="polite"></div></section></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script>
 'use strict';
 const URL_SUPABASE='https://gfjxjmrtigjlrsnjtogd.supabase.co';
 const PUBLISHABLE_KEY='sb_publishable_s4VVdzxCvPijzmZpijX7dQ_KUndER0s';
-const $=id=>document.getElementById(id);
-let db=null,sessionUser=null,profile=null,language=localStorage.getItem('hodos-language')||'ro';
+const $=id=>document.getElementById(id);let db=null,user=null,profile=null,openId=null,loading=false,dirty=false,language=localStorage.getItem('hodos-language')||'ro';
 const t=(ro,de)=>language==='ro'?ro:de;
-function status(message,type=''){const e=$('status');e.textContent=message;e.className=type;}
-function translate(){document.documentElement.lang=language;document.querySelectorAll('[data-ro][data-de]').forEach(e=>e.textContent=e.dataset[language]);$('lang').textContent=language==='ro'?'Deutsch':'Română';}
-$('lang').addEventListener('click',()=>{language=language==='ro'?'de':'ro';localStorage.setItem('hodos-language',language);translate();if(sessionUser)loadReports();});
-function todayLocal(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-$('report_date').value=todayLocal();
-function showApp(logged){$('loginBox').classList.toggle('hidden',logged);$('appBox').classList.toggle('hidden',!logged);}
-async function refreshSession(){const {data:{user},error}=await db.auth.getUser();if(error||!user){sessionUser=null;profile=null;showApp(false);return;}sessionUser=user;const result=await db.from('profiles').select('full_name,role').eq('id',user.id).maybeSingle();if(result.error){status(t('Nu pot încărca profilul: ','Profil konnte nicht geladen werden: ')+result.error.message,'error');showApp(false);return;}if(!result.data){status(t('Profilul utilizatorului lipsește. Contactează administratorul.','Benutzerprofil fehlt. Administrator kontaktieren.'),'error');showApp(false);return;}profile=result.data;$('userName').textContent=profile.full_name||user.email;$('userRole').textContent=profile.role==='admin'?'Administrator':t('Șofer','Fahrer');showApp(true);await loadReports();}
-$('loginForm').addEventListener('submit',async e=>{e.preventDefault();if(!db)return;const btn=$('loginBtn');btn.disabled=true;status(t('Se conectează…','Anmeldung läuft…'));try{const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;$('password').value='';await refreshSession();status(t('Conectat.','Angemeldet.'),'success');}catch(err){status(t('Eroare la conectare: ','Anmeldefehler: ')+err.message,'error');}finally{btn.disabled=false;}});
-$('logoutBtn').addEventListener('click',async()=>{const {error}=await db.auth.signOut();if(error)status(error.message,'error');else{sessionUser=null;profile=null;showApp(false);status(t('Deconectat.','Abgemeldet.'));}});
-$('reportForm').addEventListener('submit',async e=>{e.preventDefault();if(!sessionUser)return;const kmStart=Number($('km_start').value),kmEnd=Number($('km_end').value),breakMinutes=Number($('break_minutes').value);if(!Number.isSafeInteger(kmStart)||!Number.isSafeInteger(kmEnd)||kmEnd<kmStart){status(t('Km sosire trebuie să fie cel puțin egal cu km plecare.','KM Ende muss mindestens KM Start entsprechen.'),'error');return;}if(!Number.isSafeInteger(breakMinutes)||breakMinutes<0){status(t('Verifică durata pauzei.','Pausendauer prüfen.'),'error');return;}const record={driver_id:sessionUser.id,report_date:$('report_date').value,truck_plate:$('truck_plate').value.trim(),route_name:$('route_name').value.trim(),km_start:kmStart,km_end:kmEnd,break_minutes:breakMinutes,oil_checked:$('oil_checked').checked,tires_checked:$('tires_checked').checked,lights_checked:$('lights_checked').checked,notes:$('notes').value.trim()};if(!record.truck_plate||!record.route_name){status(t('Completează camionul și ruta.','Kennzeichen und Tour eingeben.'),'error');return;}const btn=$('saveBtn');btn.disabled=true;status(t('Se salvează…','Wird gespeichert…'));try{const {error}=await db.from('daily_reports').insert(record);if(error)throw error;status(t('Raport salvat cu succes!','Bericht erfolgreich gespeichert!'),'success');$('reportForm').reset();$('report_date').value=todayLocal();$('break_minutes').value='0';await loadReports();}catch(err){status(t('Nu s-a salvat: ','Nicht gespeichert: ')+err.message,'error');}finally{btn.disabled=false;}});
-$('refreshBtn').addEventListener('click',loadReports);
-async function loadReports() {
-  if (!sessionUser) return;
-  const area = $('reports');
-  area.textContent = t('Se încarcă…', 'Lädt…');
-
-  let query = db.from('daily_reports')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(30);
-
-  if (profile?.role !== 'admin') {
-    query = query.eq('driver_id', sessionUser.id);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    area.textContent = 'Eroare: ' + error.message;
-    return;
-  }
-
-  area.replaceChildren();
-
-  if (!data?.length) {
-    area.textContent = t('Nu există rapoarte.', 'Keine Berichte.');
-    return;
-  }
-
-  let names = {};
-  if (profile?.role === 'admin') {
-    const ids = [...new Set(data.map(r => r.driver_id))];
-    const result = await db.from('profiles')
-      .select('id,full_name')
-      .in('id', ids);
-
-    if (!result.error) {
-      for (const p of result.data || []) {
-        names[p.id] = p.full_name;
-      }
-    }
-  }
-
-  for (const r of data) {
-    const details = document.createElement('details');
-    details.className = 'record';
-
-    const summary = document.createElement('summary');
-    summary.textContent =
-      `${r.report_date} · ${r.truck_plate} · ` +
-      (names[r.driver_id] || (r.driver_id === sessionUser.id
-        ? profile?.full_name || ''
-        : t('Șofer necunoscut', 'Fahrer unbekannt')));
-
-    details.append(summary);
-
-    const fields = [
-      [t('Șofer', 'Fahrer'), names[r.driver_id] || (r.driver_id === sessionUser.id ? profile?.full_name : '') || r.driver_id],
-      [t('Rută', 'Tour'), r.route_name],
-      [t('Km plecare', 'Km Start'), r.km_start],
-      [t('Km sosire', 'Km Ende'), r.km_end],
-      [t('Km parcurși', 'Gefahrene km'), r.km_end - r.km_start],
-      [t('Pauză', 'Pause'), `${r.break_minutes} min`],
-      [t('Ulei verificat', 'Öl geprüft'), r.oil_checked],
-      [t('Anvelope verificate', 'Reifen geprüft'), r.tires_checked],
-      [t('Lumini verificate', 'Licht geprüft'), r.lights_checked],
-      [t('Observații / defecte', 'Bemerkungen / Mängel'), r.notes || '—']
-    ];
-
-    for (const [label, value] of fields) {
-      const line = document.createElement('div');
-      const shown = typeof value === 'boolean'
-        ? (value ? '✓ Da / Ja' : '✗ Nu / Nein')
-        : String(value ?? '—');
-
-      line.textContent = `${label}: ${shown}`;
-      line.style.padding = '7px 0';
-      details.append(line);
-    }
-
-    area.append(details);
-  }
-}
-
-  (async()=>{translate();if(!window.supabase?.createClient){status(t('Biblioteca Supabase nu s-a încărcat. Verifică internetul.','Supabase-Bibliothek nicht geladen. Internet prüfen.'),'error');return;}db=window.supabase.createClient(URL_SUPABASE,PUBLISHABLE_KEY);await refreshSession();db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){sessionUser=null;profile=null;showApp(false);}});})().catch(e=>status(e.message,'error'));
-db?.auth.onAuthStateChange(async (event, session) => {
-  if (event !== 'PASSWORD_RECOVERY') return;
-
-  setTimeout(async () => {
-    const parola = prompt('Introdu parola nouă (minimum 8 caractere):');
-    if (!parola) return;
-    if (parola.length < 8) {
-      alert('Parola trebuie să aibă minimum 8 caractere.');
-      return;
-    }
-
-    const { error } = await db.auth.updateUser({ password: parola });
-    alert(error ? 'Eroare: ' + error.message : 'Parola a fost schimbată cu succes!');
-  }, 0);
-});
-</script>
-</body></html>
+function status(s,type=''){$('status').textContent=s;$('status').className=type;}
+function translate(){document.documentElement.lang=language;document.querySelectorAll('[data-ro][data-de]').forEach(el=>el.textContent=el.dataset[language]);$('lang').textContent=language==='ro'?'Deutsch':'Română';}
+$('lang').onclick=()=>{language=language==='ro'?'de':'ro';localStorage.setItem('hodos-language',language);translate();if(user)loadReports();};
+function today(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');}
+function showApp(ok){$('loginBox').classList.toggle('hidden',ok);$('appBox').classList.toggle('hidden',!ok);}
+const fieldIds=['report_date','truck_plate','route_name','km_start','km_end','break_minutes','fuel_liters','oil_checked','tires_checked','lights_checked','notes'];
+function localKey(){return 'hodos-draft-'+user.id;}
+function readForm(){const o={};for(const id of fieldIds){const el=$(id);o[id]=el.type==='checkbox'?el.checked:el.value;}return o;}
+function fillForm(o){loading=true;for(const id of fieldIds){if(o[id]===undefined||o[id]===null)continue;const el=$(id);if(el.type==='checkbox')el.checked=!!o[id];else el.value=String(o[id]);}loading=false;}
+function resetForm(){loading=true;$('reportForm').reset();$('report_date').value=today();$('break_minutes').value='0';loading=false;dirty=false;}
+function saveLocal(){if(!user||loading)return;try{localStorage.setItem(localKey(),JSON.stringify({data:readForm(),openId,updated:Date.now()}));$('draftState').textContent=t('Datele sunt păstrate pe acest telefon până la salvarea online.','Daten werden auf diesem Gerät bis zur Online-Speicherung aufbewahrt.');}catch(e){status(t('Nu pot salva local: ','Lokales Speichern fehlgeschlagen: ')+e.message,'error');}}
+function restoreLocal(){try{const raw=localStorage.getItem(localKey());if(raw){const saved=JSON.parse(raw);if(saved?.data){fillForm(saved.data);dirty=true;}}}catch(e){status(e.message,'error');}}
+function valueInt(id,required=false){const v=$(id).value;if(v===''){if(required)throw Error(t('Completează ','Bitte ausfüllen: ')+id);return null;}const n=Number(v);if(!Number.isSafeInteger(n)||n<0)throw Error(t('Valoare invalidă: ','Ungültiger Wert: ')+id);return n;}
+function makeRecord(finalize=false){const kmStart=valueInt('km_start',true),kmEnd=valueInt('km_end',finalize),breakMinutes=valueInt('break_minutes',true);if(kmEnd!==null&&kmEnd<kmStart)throw Error(t('Km sosire nu poate fi mai mic decât km plecare.','KM Ende darf nicht kleiner als KM Start sein.'));if(breakMinutes>1440)throw Error(t('Pauza este prea mare.','Pause ist zu lang.'));const liters=$('fuel_liters').value.trim();const fuel=liters===''?null:Number(liters);if(fuel!==null&&(!Number.isFinite(fuel)||fuel<0))throw Error(t('Cantitate motorină invalidă.','Ungültige Kraftstoffmenge.'));const rec={driver_id:user.id,report_date:$('report_date').value,truck_plate:$('truck_plate').value.trim(),route_name:$('route_name').value.trim(),km_start:kmStart,km_end:kmEnd,break_minutes:breakMinutes,fuel_liters:fuel,oil_checked:$('oil_checked').checked,tires_checked:$('tires_checked').checked,lights_checked:$('lights_checked').checked,notes:$('notes').value.trim()};if(!rec.report_date||!rec.truck_plate||!rec.route_name)throw Error(t('Completează data, camionul și ruta.','Datum, Kennzeichen und Tour ausfüllen.'));return rec;}
+async function findOpen(){const {data,error}=await db.from('daily_reports').select('*').eq('driver_id',user.id).eq('is_finalized',false).order('created_at',{ascending:false}).limit(1);if(error)throw error;return data?.[0]||null;}
+async function restoreDraft(){resetForm();openId=null;const remote=await findOpen();if(remote){openId=remote.id;fillForm(remote);$('draftState').textContent=t('Tură deschisă, salvată online.','Offene Tour, online gespeichert.');}else{restoreLocal();$('draftState').textContent=t('Tură nouă. Completează datele de plecare.','Neue Tour. Startdaten eingeben.');}}
+async function refreshSession(){const result=await db.auth.getUser();const u=result.data?.user;if(result.error||!u){user=null;profile=null;showApp(false);return;}user=u;const p=await db.from('profiles').select('full_name,role').eq('id',u.id).maybeSingle();if(p.error||!p.data){showApp(false);status(t('Profil indisponibil: ','Profil nicht verfügbar: ')+(p.error?.message||'lipsă'),'error');return;}profile=p.data;$('userName').textContent=profile.full_name||u.email;$('userRole').textContent=profile.role==='admin'?'Administrator':t('Șofer','Fahrer');showApp(true);try{await restoreDraft();}catch(e){restoreLocal();status(t('Nu pot încărca tura online: ','Online-Tour konnte nicht geladen werden: ')+e.message,'error');}await loadReports();}
+$('loginForm').onsubmit=async e=>{e.preventDefault();$('loginBtn').disabled=true;try{const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;$('password').value='';await refreshSession();if(profile)status(t('Conectat.','Angemeldet.'),'success');}catch(err){status(err.message,'error');}finally{$('loginBtn').disabled=false;}};
+$('logoutBtn').onclick=async()=>{if(user)saveLocal();const {error}=await db.auth.signOut();if(error){status(error.message,'error');return;}user=null;profile=null;openId=null;showApp(false);status(t('Deconectat.','Abgemeldet.'));};
+$('reportForm').addEventListener('input',()=>{dirty=true;saveLocal();});$('reportForm').addEventListener('change',()=>{dirty=true;saveLocal();});
+async function saveProgress(finalize=false){if(!user)return;const btn=finalize?$('finishBtn'):$('saveBtn');btn.disabled=true;$('saveBtn').disabled=true;$('finishBtn').disabled=true;try{const rec=makeRecord(finalize);if(finalize&&!confirm(t('Finalizezi tura? După finalizare raportul nu mai poate fi modificat.','Tour abschließen? Danach kann der Bericht nicht mehr geändert werden.')))return;
+let result;if(openId){result=await db.from('daily_reports').update({...rec,...(finalize?{is_finalized:true}:{})}).eq('id',openId).eq('driver_id',user.id).eq('is_finalized',false).select('id').single();}else{result=await db.from('daily_reports').insert({...rec,is_finalized:finalize}).select('id').single();}if(result.error)throw result.error;
+if(finalize){openId=null;localStorage.removeItem(localKey());resetForm();$('draftState').textContent=t('Tura a fost finalizată.','Tour abgeschlossen.');status(t('Raport finalizat și blocat.','Bericht abgeschlossen und gesperrt.'),'success');}else{openId=result.data.id;dirty=false;saveLocal();$('draftState').textContent=t('Progres salvat online.','Zwischenstand online gespeichert.');status(t('Progres salvat cu succes.','Zwischenstand erfolgreich gespeichert.'),'success');}await loadReports();
+}catch(err){saveLocal();status(t('Nu s-a salvat online: ','Nicht online gespeichert: ')+err.message,'error');}finally{btn.disabled=false;$('saveBtn').disabled=false;$('finishBtn').disabled=false;}}
+$('reportForm').onsubmit=e=>{e.preventDefault();saveProgress(false);};$('finishBtn').onclick=()=>saveProgress(true);
+$('refreshBtn').onclick=loadReports;
+async function loadReports(){if(!user)return;const area=$('reports');area.textContent=t('Se încarcă…','Lädt…');let q=db.from('daily_reports').select('*').order('created_at',{ascending:false}).limit(30);if(profile?.role!=='admin')q=q.eq('driver_id',user.id);const {data,error}=await q;if(error){area.textContent='Eroare: '+error.message;return;}area.replaceChildren();if(!data?.length){area.textContent=t('Nu există rapoarte.','Keine Berichte.');return;}const names={};if(profile?.role==='admin'){const ids=[...new Set(data.map(r=>r.driver_id))];const res=await db.from('profiles').select('id,full_name').in('id',ids);if(!res.error)for(const p of res.data||[])names[p.id]=p.full_name;}
+for(const r of data){const d=document.createElement('details');d.className='record';const s=document.createElement('summary');const name=names[r.driver_id]||(r.driver_id===user.id?profile.full_name:t('Șofer necunoscut','Fahrer unbekannt'));s.textContent=`${r.report_date} · ${r.truck_plate} · ${name} · ${r.is_finalized?t('Finalizat','Abgeschlossen'):t('În curs','Offen')}`;d.append(s);const fields=[[t('Șofer','Fahrer'),name],[t('Rută','Tour'),r.route_name],[t('Km plecare','KM Start'),r.km_start],[t('Km sosire','KM Ende'),r.km_end],[t('Km parcurși','Gefahrene KM'),r.km_end==null?'—':r.km_end-r.km_start],[t('Pauză','Pause'),`${r.break_minutes} min`],[t('Motorină (litri)','Getankt (Liter)'),r.fuel_liters],[t('Ulei verificat','Öl geprüft'),r.oil_checked],[t('Anvelope verificate','Reifen geprüft'),r.tires_checked],[t('Lumini verificate','Licht geprüft'),r.lights_checked],[t('Observații','Bemerkungen'),r.notes||'—']];for(const [label,val] of fields){const line=document.createElement('div');line.style.padding='7px 0';line.textContent=label+': '+(typeof val==='boolean'?(val?'✓ Da / Ja':'✗ Nu / Nein'):String(val??'—'));d.append(line);}area.append(d);}}
+(async()=>{translate();if(!window.supabase?.createClient)throw Error(t('Biblioteca Supabase nu s-a încărcat.','Supabase-Bibliothek nicht geladen.'));db=window.supabase.createClient(URL_SUPABASE,PUBLISHABLE_KEY);await refreshSession();db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){user=null;profile=null;showApp(false);}if(event==='PASSWORD_RECOVERY'){setTimeout(async()=>{const pwd=prompt(t('Parola nouă (minimum 8 caractere):','Neues Passwort (mindestens 8 Zeichen):'));if(!pwd)return;if(pwd.length<8){alert(t('Minimum 8 caractere.','Mindestens 8 Zeichen.'));return;}const {error}=await db.auth.updateUser({password:pwd});alert(error?error.message:t('Parola a fost schimbată.','Passwort geändert.'));},0);}});})().catch(e=>status(e.message,'error'));
+</script></body></html>
