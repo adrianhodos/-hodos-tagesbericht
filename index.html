@@ -39,6 +39,28 @@ if(finalize){openId=null;localStorage.removeItem(localKey());resetForm();$('draf
 $('reportForm').onsubmit=e=>{e.preventDefault();saveProgress(false);};$('finishBtn').onclick=()=>saveProgress(true);
 $('refreshBtn').onclick=loadReports;
 async function loadReports(){if(!user)return;const area=$('reports');area.textContent=t('Se încarcă…','Lädt…');let q=db.from('daily_reports').select('*').order('created_at',{ascending:false}).limit(30);if(profile?.role!=='admin')q=q.eq('driver_id',user.id);const {data,error}=await q;if(error){area.textContent='Eroare: '+error.message;return;}area.replaceChildren();if(!data?.length){area.textContent=t('Nu există rapoarte.','Keine Berichte.');return;}const names={};if(profile?.role==='admin'){const ids=[...new Set(data.map(r=>r.driver_id))];const res=await db.from('profiles').select('id,full_name').in('id',ids);if(!res.error)for(const p of res.data||[])names[p.id]=p.full_name;}
-for(const r of data){const d=document.createElement('details');d.className='record';const s=document.createElement('summary');const name=names[r.driver_id]||(r.driver_id===user.id?profile.full_name:t('Șofer necunoscut','Fahrer unbekannt'));s.textContent=`${r.report_date} · ${r.truck_plate} · ${name} · ${r.is_finalized?t('Finalizat','Abgeschlossen'):t('În curs','Offen')}`;d.append(s);const fields=[[t('Șofer','Fahrer'),name],[t('Rută','Tour'),r.route_name],[t('Km plecare','KM Start'),r.km_start],[t('Km sosire','KM Ende'),r.km_end],[t('Km parcurși','Gefahrene KM'),r.km_end==null?'—':r.km_end-r.km_start],[t('Pauză','Pause'),`${r.break_minutes} min`],[t('Motorină (litri)','Getankt (Liter)'),r.fuel_liters],[t('Ulei verificat','Öl geprüft'),r.oil_checked],[t('Anvelope verificate','Reifen geprüft'),r.tires_checked],[t('Lumini verificate','Licht geprüft'),r.lights_checked],[t('Observații','Bemerkungen'),r.notes||'—']];for(const [label,val] of fields){const line=document.createElement('div');line.style.padding='7px 0';line.textContent=label+': '+(typeof val==='boolean'?(val?'✓ Da / Ja':'✗ Nu / Nein'):String(val??'—'));d.append(line);}area.append(d);}}
+for(const r of data){const d=document.createElement('details');d.className='record';const s=document.createElement('summary');const name=names[r.driver_id]||(r.driver_id===user.id?profile.full_name:t('Șofer necunoscut','Fahrer unbekannt'));s.textContent=`${r.report_date} · ${r.truck_plate} · ${name} · ${r.is_finalized?t('Finalizat','Abgeschlossen'):t('În curs','Offen')}`;d.append(s);const fields=[[t('Șofer','Fahrer'),name],[t('Rută','Tour'),r.route_name],[t('Km plecare','KM Start'),r.km_start],[t('Km sosire','KM Ende'),r.km_end],[t('Km parcurși','Gefahrene KM'),r.km_end==null?'—':r.km_end-r.km_start],[t('Pauză','Pause'),`${r.break_minutes} min`],[t('Motorină (litri)','Getankt (Liter)'),r.fuel_liters],[t('Ulei verificat','Öl geprüft'),r.oil_checked],[t('Anvelope verificate','Reifen geprüft'),r.tires_checked],[t('Lumini verificate','Licht geprüft'),r.lights_checked],[t('Observații','Bemerkungen'),r.notes||'—']];for(const [label,val] of fields){const line=document.createElement('div');line.style.padding='7px 0';line.textContent=label+': '+(typeof val==='boolean'?(val?'✓ Da / Ja':'✗ Nu / Nein'):String(val??'—'));d.append(line);}
+if(profile?.role==='admin'){
+  const btn=document.createElement('button');
+  btn.type='button';
+  btn.textContent=t('Șterge raport','Bericht löschen');
+  btn.style.background='#b42318';
+  btn.style.marginTop='12px';
+
+  btn.onclick=async()=>{
+    if(!confirm(t('Ștergi definitiv acest raport?','Bericht endgültig löschen?')))return;
+
+    const {data:deleted,error}=await db.from('daily_reports')
+      .delete().eq('id',r.id).select('id');
+
+    if(error){alert(error.message);return;}
+    if(!deleted?.length){alert('Raportul nu a fost șters.');return;}
+
+    await loadReports();
+  };
+  d.append(btn);
+}
+area.append(d);}}
+
 (async()=>{translate();if(!window.supabase?.createClient)throw Error(t('Biblioteca Supabase nu s-a încărcat.','Supabase-Bibliothek nicht geladen.'));db=window.supabase.createClient(URL_SUPABASE,PUBLISHABLE_KEY);await refreshSession();db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){user=null;profile=null;showApp(false);}if(event==='PASSWORD_RECOVERY'){setTimeout(async()=>{const pwd=prompt(t('Parola nouă (minimum 8 caractere):','Neues Passwort (mindestens 8 Zeichen):'));if(!pwd)return;if(pwd.length<8){alert(t('Minimum 8 caractere.','Mindestens 8 Zeichen.'));return;}const {error}=await db.auth.updateUser({password:pwd});alert(error?error.message:t('Parola a fost schimbată.','Passwort geändert.'));},0);}});})().catch(e=>status(e.message,'error'));
 </script></body></html>
