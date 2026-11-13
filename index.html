@@ -23,6 +23,7 @@ button.secondary{background:#e5edf6;color:#17365d}button.danger{background:#136d
 .checks input{width:21px;height:21px}.muted{color:#62758a;font-size:.9rem}.error{color:#a61d24}
 .success{color:#136d42}.hidden{display:none!important}.record{padding:12px;border-bottom:1px solid #e0e7ee;overflow-wrap:anywhere}
 .record:last-child{border:0}#status{min-height:24px;white-space:pre-wrap}header{margin-bottom:12px}
+.hint{font-size:.88rem;color:#62758a;margin:6px 0 12px}
 </style>
 </head>
 <body>
@@ -43,14 +44,15 @@ button.secondary{background:#e5edf6;color:#17365d}button.danger{background:#136d
 <form id="reportForm">
 <label data-ro="Data" data-de="Datum">Data</label><input id="report_date" type="date" required>
 <label data-ro="Număr camion" data-de="LKW-Kennzeichen">Număr camion</label><input id="truck_plate" maxlength="30" placeholder="SEF-HA 23" required>
-<label data-ro="Tură / rută" data-de="Tour / Route">Tură / rută</label><input id="route_name" maxlength="150" required>
 <div class="grid"><div><label data-ro="Km plecare" data-de="KM Start">Km plecare</label><input id="km_start" type="number" min="0" step="1" required></div><div><label data-ro="Km sosire" data-de="KM Ende">Km sosire</label><input id="km_end" type="number" min="0" step="1"></div></div>
-<label data-ro="Pauză (minute)" data-de="Pause (Minuten)">Pauză (minute)</label><input id="break_minutes" type="number" min="0" max="1440" step="1">
-<label data-ro="Motorină alimentată (litri)" data-de="Getankt (Liter)">Motorină alimentată (litri)</label><input id="fuel_liters" type="number" min="0" step="0.01" placeholder="0">
-<label data-ro="AdBlue alimentat (litri)" data-de="AdBlue nachgefüllt (Liter)">AdBlue alimentat (litri)</label><input id="adblue_liters" type="number" min="0" step="0.01" placeholder="0">
 <div class="checks"><label><input type="checkbox" id="oil_checked"><span data-ro="Ulei verificat" data-de="Öl kontrolliert">Ulei verificat</span></label>
 <label><input type="checkbox" id="tires_checked"><span data-ro="Anvelope verificate" data-de="Reifen kontrolliert">Anvelope verificate</span></label>
 <label><input type="checkbox" id="lights_checked"><span data-ro="Lumini verificate" data-de="Beleuchtung kontrolliert">Lumini verificate</span></label></div>
+<p class="hint" data-ro="La plecare sunt obligatorii camionul, km de plecare și toate cele trei verificări. Ruta se poate completa mai târziu." data-de="Beim Start sind Kennzeichen, Startkilometer und alle drei Kontrollen Pflicht. Die Tour kann später eingetragen werden.">La plecare sunt obligatorii camionul, km de plecare și toate cele trei verificări. Ruta se poate completa mai târziu.</p>
+<label data-ro="Tură / rută (se completează ulterior)" data-de="Tour / Route (später eintragen)">Tură / rută (se completează ulterior)</label><input id="route_name" maxlength="150">
+<label data-ro="Pauză (minute, inclusiv 0)" data-de="Pause (Minuten, auch 0)">Pauză (minute, inclusiv 0)</label><input id="break_minutes" type="number" min="0" max="1440" step="1">
+<label data-ro="Motorină alimentată (litri)" data-de="Getankt (Liter)">Motorină alimentată (litri)</label><input id="fuel_liters" type="number" min="0" step="0.01" placeholder="0">
+<label data-ro="AdBlue alimentat (litri)" data-de="AdBlue nachgefüllt (Liter)">AdBlue alimentat (litri)</label><input id="adblue_liters" type="number" min="0" step="0.01" placeholder="0">
 <label data-ro="Observații / defecte" data-de="Bemerkungen / Mängel">Observații / defecte</label><textarea id="notes" maxlength="2000"></textarea>
 <p class="row"><button id="saveBtn" type="submit" data-ro="Salvează progresul" data-de="Zwischenstand speichern">Salvează progresul</button><button id="finishBtn" class="danger" type="button" data-ro="Finalizează tura" data-de="Tour abschließen">Finalizează tura</button></p>
 </form></section>
@@ -76,7 +78,7 @@ function showWorkTime(){
     (currentWorkEnd?' · '+t('Sfârșit program: ','Arbeitsende: ')+formatWorkTime(currentWorkEnd):''):
     t('Ora începerii se înregistrează la prima salvare online.','Arbeitsbeginn wird beim ersten Online-Speichern erfasst.');
 }
-function translate(){document.documentElement.lang=language;document.querySelectorAll('[data-ro][data-de]').forEach(el=>el.textContent=el.dataset[language]);$('lang').textContent=language==='ro'?'Deutsch':'Română';showWorkTime();}
+function translate(){document.documentElement.lang=language;document.querySelectorAll('[data-ro][data-de]').forEach(el=>el.textContent=el.dataset[language]);$('lang').textContent=language==='ro'?'Deutsch':'Română';showWorkTime();if(profile)$('userRole').textContent=profile.role==='admin'?'Administrator':t('Șofer','Fahrer');}
 $('lang').onclick=()=>{language=language==='ro'?'de':'ro';localStorage.setItem('hodos-language',language);translate();if(user)loadReports();};
 function today(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');}
 function showApp(ok){$('loginBox').classList.toggle('hidden',ok);$('appBox').classList.toggle('hidden',!ok);}
@@ -96,8 +98,10 @@ function makeRecord(finalize=false){
   if(fuel!==null&&(!Number.isFinite(fuel)||fuel<0))throw Error(t('Cantitate motorină invalidă.','Ungültige Kraftstoffmenge.'));
   const adblueInput=$('adblue_liters').value.trim(),adblue=adblueInput===''?null:Number(adblueInput);
   if(adblue!==null&&(!Number.isFinite(adblue)||adblue<0))throw Error(t('Cantitate AdBlue invalidă.','Ungültige AdBlue-Menge.'));
-  const rec={driver_id:user.id,report_date:$('report_date').value,truck_plate:$('truck_plate').value.trim(),route_name:$('route_name').value.trim(),km_start:kmStart,km_end:kmEnd,break_minutes:breakMinutes,fuel_liters:fuel,adblue_liters:adblue,oil_checked:$('oil_checked').checked,tires_checked:$('tires_checked').checked,lights_checked:$('lights_checked').checked,notes:$('notes').value.trim()};
-  if(!rec.report_date||!rec.truck_plate||!rec.route_name)throw Error(t('Completează data, camionul și ruta.','Datum, Kennzeichen und Tour ausfüllen.'));
+  const rec={driver_id:user.id,report_date:$('report_date').value,truck_plate:$('truck_plate').value.trim(),route_name:$('route_name').value.trim()||null,km_start:kmStart,km_end:kmEnd,break_minutes:breakMinutes,fuel_liters:fuel,adblue_liters:adblue,oil_checked:$('oil_checked').checked,tires_checked:$('tires_checked').checked,lights_checked:$('lights_checked').checked,notes:$('notes').value.trim()};
+  if(!rec.report_date||!rec.truck_plate)throw Error(t('Completează data și camionul.','Datum und Kennzeichen ausfüllen.'));
+  if(!rec.oil_checked||!rec.tires_checked||!rec.lights_checked)throw Error(t('La plecare trebuie confirmate verificările: ulei, anvelope și lumini.','Vor Arbeitsbeginn müssen Öl, Reifen und Beleuchtung kontrolliert und bestätigt werden.'));
+  if(finalize&&!rec.route_name)throw Error(t('La finalizare trebuie completată ruta.','Vor Abschluss muss die Tour eingetragen werden.'));
   return rec;
 }
 async function findOpen(){const {data,error}=await db.from('daily_reports').select('*').eq('driver_id',user.id).eq('is_finalized',false).order('created_at',{ascending:false}).limit(1);if(error)throw error;return data?.[0]||null;}
@@ -165,7 +169,7 @@ async function saveProgress(finalize=false){
     }else{
       dirty=false;saveLocal();
       $('draftState').textContent=t('Progres salvat online.','Zwischenstand online gespeichert.');
-      status(t('Progres și ora începerii salvate online.','Zwischenstand und Arbeitsbeginn online gespeichert.'),'success');
+      status(t('Progres salvat. Ora începerii a fost înregistrată online.','Zwischenstand gespeichert. Arbeitsbeginn wurde online erfasst.'),'success');
     }
     await loadReports();
   }catch(err){
@@ -199,7 +203,7 @@ async function loadReports(){
     d.append(s);
     const fields=[
       [t('Șofer','Fahrer'),name],
-      [t('Rută','Tour'),r.route_name],
+      [t('Rută','Tour'),r.route_name||'—'],
       [t('Început program','Arbeitsbeginn'),formatWorkTime(r.work_started_at)],
       [t('Sfârșit program','Arbeitsende'),formatWorkTime(r.work_ended_at)],
       [t('Km plecare','KM Start'),r.km_start],
